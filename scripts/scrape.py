@@ -117,45 +117,16 @@ def fetch_via_search(max_count: int = 30) -> list[dict]:
     return all_videos
 
 
-def get_category_tags(title: str, description: str) -> list[str]:
-    """根据标题简单分类"""
-    text = (title + " " + description).lower()
-    categories = []
-    
-    if any(w in text for w in ["news", "breaking", "报道", "新闻", "update"]):
-        categories.append("新闻")
-    if any(w in text for w in ["music", "song", "mv", "audio", "专辑", "歌手", "official"]):
-        categories.append("音乐")
-    if any(w in text for w in ["game", "gaming", "gameplay", "游戏", "直播", "minecraft", "fortnite"]):
-        categories.append("游戏")
-    if any(w in text for w in ["sport", "football", "basketball", "nba", "soccer", "比赛", "nfl"]):
-        categories.append("体育")
-    if any(w in text for w in ["movie", "trailer", "film", "电影", "预告", "teaser"]):
-        categories.append("影视")
-    if any(w in text for w in ["tech", "ai", "iphone", "android", "科技", "手机", "computer"]):
-        categories.append("科技")
-    if any(w in text for w in ["comedy", "funny", "搞笑", "prank"]):
-        categories.append("搞笑")
-    if any(w in text for w in ["education", "tutorial", "学习", "教程", "教学", "how to"]):
-        categories.append("教育")
-    
-    if not categories:
-        categories.append("综合")
-    
-    return categories
-
-
 def main():
     print("正在抓取 YouTube 热搜榜单...")
     
-    html = fetch_trending_page()
-    print("页面获取成功，正在解析...")
+    videos = fetch_trending(max_count=30)
     
-    initial_data = extract_initial_data(html)
-    print("ytInitialData 提取成功，正在提取视频列表...")
+    if not videos:
+        print("主方案失败，尝试备选方案...")
+        videos = fetch_via_search(max_count=30)
     
-    videos = parse_trending_videos(initial_data, max_count=30)
-    print(f"解析完成，共 {len(videos)} 个视频")
+    print(f"抓取完成，共 {len(videos)} 个视频")
     
     # 构建输出
     trending_list = []
