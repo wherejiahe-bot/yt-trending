@@ -1,0 +1,38 @@
+name: 抓取 YouTube 实时热搜榜单
+
+on:
+  schedule:
+    - cron: '0 */4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 安装依赖
+        run: pip install requests
+
+      - name: 抓取 & 解析
+        run: python scripts/scrape.py
+
+      - name: 提交 & 推送
+        run: |
+          git config user.name "wherejiahe-bot"
+          git config user.email "wherejiahe-bot@users.noreply.github.com"
+          if [ -n "$(git status --porcelain)" ]; then
+            git add data/
+            git commit -m "auto: 更新 YouTube 热搜榜单 $(date -u '+%Y-%m-%d %H:%M')"
+            git push
+          else
+            echo "无变化，跳过提交"
+          fi
